@@ -114,7 +114,7 @@ class Configurator (SectionPlugin):
             for prov in PermissionProvider.get_all():
                 for perm in prov.get_permissions():
                     has = box.find(perm[0]).value
-                    if has and not perm[0] in item.permissions:
+                    if has and perm[0] not in item.permissions:
                         item.permissions.append(perm[0])
                     if not has and perm[0] in item.permissions:
                         item.permissions.remove(perm[0])

@@ -14,7 +14,7 @@ class DebianPackageManager (PackageManager):
         out_u = subprocess.check_output(['apt-show-versions', '-u'])
         out_a = subprocess.check_output(['dpkg', '-l'])
         self.all = self._parse_dpkg(out_a)
-        self.all_dict = dict((x.name, x) for x in self.all)
+        self.all_dict = {x.name: x for x in self.all}
         self.upgradeable = self._parse_asv(out_u)
 
     def search(self, query):
@@ -31,7 +31,7 @@ class DebianPackageManager (PackageManager):
             p.state = 'i' if p.name in self.all_dict else 'r'
             p.version = s[1]
 
-            if not p.name in found or found[p.name] < p.version:
+            if p.name not in found or found[p.name] < p.version:
                 r.append(p)
                 found[p.name] = p.version
         return r

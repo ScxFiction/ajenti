@@ -13,10 +13,12 @@ class SMARTSensor (Sensor):
     timeout = 5
 
     def get_variants(self):
-        r = []
-        for s in os.listdir('/dev'):
-            if re.match('sd.$|hd.$|scd.$|fd.$|ad.+$', s):
-                r.append(s)
+        r = [
+            s
+            for s in os.listdir('/dev')
+            if re.match('sd.$|hd.$|scd.$|fd.$|ad.+$', s)
+        ]
+
         return sorted(r)
 
     def measure(self, path):
@@ -30,7 +32,7 @@ class SMARTSensor (Sensor):
         """
         if not path:
             return -1
-        r = subprocess.call(['smartctl', '-H', '/dev/' + path])
+        r = subprocess.call(['smartctl', '-H', f'/dev/{path}'])
         if r & 2:
             return -1
         if r & 8:

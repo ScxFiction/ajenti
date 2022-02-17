@@ -36,10 +36,7 @@ class PSQLPlugin (DBPlugin):
         return filter(None, o.split('~~~'))
 
     def query_sql(self, db, sql):
-        r = []
-        for l in self.query(sql.replace('"', '\\"') + ';', db):
-            r.append(l.split('|'))
-        return r
+        return [l.split('|') for l in self.query(sql.replace('"', '\\"') + ';', db)]
 
     def query_databases(self):
         r = []

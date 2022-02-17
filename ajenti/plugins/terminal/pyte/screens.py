@@ -477,12 +477,10 @@ class Screen(object):
         """Move to the next tab space, or the end of the screen if there
         aren't anymore left.
         """
-        for stop in sorted(self.tabstops):
-            if self.cursor.x < stop:
-                column = stop
-                break
-        else:
-            column = self.columns - 1
+        column = next(
+            (stop for stop in sorted(self.tabstops) if self.cursor.x < stop),
+            self.columns - 1,
+        )
 
         self.cursor.x = column
 
@@ -628,15 +626,11 @@ class Screen(object):
                              unchanged **not implemented**.
         """
         interval = (
-            # a) erase from the cursor to the end of line, including
-            # the cursor,
             range(self.cursor.x, self.columns),
-            # b) erase from the beginning of the line to the cursor,
-            # including it,
-            range(0, self.cursor.x + 1),
-            # c) erase the entire line.
-            range(0, self.columns)
-        )[type_of]
+            range(self.cursor.x + 1),
+            range(self.columns)[type_of],
+        )
+
 
         for column in interval:
             self.buffer[self.cursor.y][column] = self.cursor.attrs
@@ -656,15 +650,11 @@ class Screen(object):
                              unchanged **not implemented**.
         """
         interval = (
-            # a) erase from cursor to the end of the display, including
-            # the cursor,
             range(self.cursor.y + 1, self.lines),
-            # b) erase from the beginning of the display to the cursor,
-            # including it,
-            range(0, self.cursor.y),
-            # c) erase the whole display.
-            range(0, self.lines)
-        )[type_of]
+            range(self.cursor.y),
+            range(self.lines)[type_of],
+        )
+
 
         for line in interval:
             self.buffer[line][:] = \
@@ -926,11 +916,12 @@ class DiffScreen(Screen):
         super(DiffScreen, self).erase_in_line(*args)
 
     def erase_in_display(self, type_of=0):
-        self.dirty.update((
+        self.dirty.update(
             range(self.cursor.y + 1, self.lines),
-            range(0, self.cursor.y),
-            range(0, self.lines)
-        )[type_of])
+            range(self.cursor.y),
+            range(self.lines)[type_of],
+        )
+
         super(DiffScreen, self).erase_in_display(type_of)
 
     def alignment_display(self):

@@ -57,7 +57,7 @@ class UserManager (BasePlugin):
         if username == 'root' and not provider.syncs_root:
             provider = ajenti.usersync.AjentiSyncProvider.get()
 
-        if not username in ajenti.config.tree.users:
+        if username not in ajenti.config.tree.users:
             return False
 
         try:
@@ -68,12 +68,8 @@ class UserManager (BasePlugin):
         result = provider.check_password(username, password)
 
         provider_name = type(provider).__name__
-
-        ip_notion = ''
         ip = env.get('REMOTE_ADDR', None) if env else None
-        if ip:
-            ip_notion = ' from %s' % ip
-
+        ip_notion = ' from %s' % ip if ip else ''
         if not result:
             msg = 'failed login attempt for %s ("%s") through %s%s' % \
                 (username, password, provider_name, ip_notion)
@@ -108,7 +104,7 @@ class UserManager (BasePlugin):
         """
         if context.user.name == 'root':
             return True
-        if not permission in context.user.permissions:
+        if permission not in context.user.permissions:
             return False
         return True
 

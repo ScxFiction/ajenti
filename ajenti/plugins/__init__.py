@@ -184,7 +184,7 @@ class PluginContext (object):
 
     def get_instance(self, cls):
         self.vacuum_instances()
-        if not cls in self.__instances:
+        if cls not in self.__instances:
             return self.instantiate(cls)
         inst = list(self.__instances[cls])[0]()
         if inst is None:
@@ -206,7 +206,10 @@ class PluginContext (object):
         if nit is not True and nit != cls:
             logging.debug('%s instantiated [%s] %s' % (self, type(instance).__name__, instance))
             for iface in cls._implements + [cls]:
-                if not getattr(iface, '_no_instance_tracking', None) in [True, iface]:
+                if getattr(iface, '_no_instance_tracking', None) not in [
+                    True,
+                    iface,
+                ]:
                     self.__instances.setdefault(iface, set()).add(weakref.ref(instance))
 
         if hasattr(cls, '_instance_hardref'):
@@ -255,15 +258,17 @@ class PluginManager:
         locations = [path]
         if os.path.exists(self.extra_location):
             locations += [self.extra_location]
-        
+
         items = []
         for location in locations:
             items += [(x, os.path.join(location, x)) for x in os.listdir(location)]
 
         for item in items:
-            if os.path.exists(os.path.join(item[1], '__init__.py')):
-                if not item[0] in self.__plugins:
-                    self.load_recursive(item[0])
+            if (
+                os.path.exists(os.path.join(item[1], '__init__.py'))
+                and item[0] not in self.__plugins
+            ):
+                self.load_recursive(item[0])
 
     def get_plugins_root(self):
         return os.path.split(__file__)[0]
@@ -276,12 +281,14 @@ class PluginManager:
             try:
                 return self.load(name)
             except PluginDependency.Unsatisfied as e:
-                if e.dependency.plugin_name in manager.get_all():
-                    if manager.get_all()[e.dependency.plugin_name].crash:
-                        manager.get_all()[name].crash = e
-                        logging.warn(' *** Plugin dependency unsatisfied: %s -> %s' %
-                                    (name, e.dependency.plugin_name))
-                        return
+                if (
+                    e.dependency.plugin_name in manager.get_all()
+                    and manager.get_all()[e.dependency.plugin_name].crash
+                ):
+                    manager.get_all()[name].crash = e
+                    logging.warn(' *** Plugin dependency unsatisfied: %s -> %s' %
+                                (name, e.dependency.plugin_name))
+                    return
                 try:
                     logging.debug('Preloading plugin dependency: %s' % e.dependency.plugin_name)
                     if not self.load_recursive(e.dependency.plugin_name):

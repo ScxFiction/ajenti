@@ -22,7 +22,7 @@ ntpd_conf = '/etc/ntp.conf'
 
 
 def isopenntpd():
-    return not ServiceMultiplexor.get().get_one('openntpd') is None
+    return ServiceMultiplexor.get().get_one('openntpd') is not None
 
 
 class NTPDData(BoundData):
@@ -109,9 +109,10 @@ class NTPDPlugin(SectionPlugin):
 
         self.available_zones = []
         for d, dirs, files in os.walk('/usr/share/zoneinfo', followlinks=False):
-            for f in files:
-                if f != 'zone.tab':
-                    self.available_zones.append(os.path.join(d, f))
+            self.available_zones.extend(
+                os.path.join(d, f) for f in files if f != 'zone.tab'
+            )
+
         self.available_zones = [x[len('/usr/share/zoneinfo/'):] for x in self.available_zones]
         self.available_zones.sort()
 

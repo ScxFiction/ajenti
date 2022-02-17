@@ -70,8 +70,7 @@ def cache_value(duration=None):
 
         def wrapper(*args, **kwargs):
             dt = time.time() - fx.__cached_at
-            if (dt > duration and duration is not None) or \
-                    (fx.__cached_at == 0 and duration is None):
+            if dt > duration is not None or (fx.__cached_at == 0 and duration is None):
                 val = fx(*args, **kwargs)
                 fx.__cached = val
                 fx.__cached_at = time.time()
@@ -118,9 +117,9 @@ def make_report(e):
     logging.blackbox.stop()
 
     tb = traceback.format_exc(e)
-    tb = '\n'.join('    ' + x for x in tb.splitlines())
+    tb = '\n'.join(f'    {x}' for x in tb.splitlines())
     log = logging.blackbox.buffer
-    log = '\n'.join('    ' + x for x in log.splitlines())
+    log = '\n'.join(f'    {x}' for x in log.splitlines())
 
     catcher_url = None
     try:

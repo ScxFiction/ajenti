@@ -37,7 +37,7 @@ class CentosNetworkConfig (LinuxIfconfig, INetworkConfig):
         for ifcf in os.listdir('/etc/sysconfig/network-scripts/'):
             if ifcf.startswith('ifcfg-'):
                 ifcn = ifcf[6:]
-                with open('/etc/sysconfig/network-scripts/' + ifcf, 'r') as f:
+                with open(f'/etc/sysconfig/network-scripts/{ifcf}', 'r') as f:
                     ss = f.read().splitlines()
                     d = {}
                     for s in ss:
@@ -80,7 +80,7 @@ class CentosNetworkConfig (LinuxIfconfig, INetworkConfig):
 
     def save(self):
         for i in self.interfaces:
-            with open('/etc/sysconfig/network-scripts/ifcfg-' + i, 'w') as f:
+            with open(f'/etc/sysconfig/network-scripts/ifcfg-{i}', 'w') as f:
                 self.save_iface(self.interfaces[i], f)
         return
 

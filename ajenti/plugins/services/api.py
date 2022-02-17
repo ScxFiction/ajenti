@@ -26,8 +26,7 @@ class ServiceMultiplexor (object):
         Returns a :class:`Service` by name.
         """
         for mgr in self.managers:
-            s = mgr.get_one(name)
-            if s:
+            if s := mgr.get_one(name):
                 return s
         return None
 
@@ -42,10 +41,7 @@ class ServiceManager (object):
         """
         Returns a :class:`Service` by name.
         """
-        for s in self.get_all():
-            if s.name == name:
-                return s
-        return None
+        return next((s for s in self.get_all() if s.name == name), None)
 
 
 class Service (object):

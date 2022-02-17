@@ -24,7 +24,7 @@ class UrpmiPackageManager (PackageManager):
         try:
             out_a = subprocess.check_output(['urpmq', '--list', "-r"])
             self.all = self._parse_urpmi(out_a)
-            self.all_dict = dict((x.name, x) for x in self.all)
+            self.all_dict = {x.name: x for x in self.all}
         except subprocess.CalledProcessError as e:
             self.all = []
             self.all_dict = {}
@@ -67,13 +67,13 @@ class UrpmiPackageManager (PackageManager):
         to_install = [a for a in actions if a.action == 'i']
         to_remove = [a for a in actions if a.action == 'r']
         cmd = ''
-        if len(to_install) > 0:
+        if to_install:
             cmd += 'urpmi ' + ' '.join(a.name for a in to_install)
-            if len(to_remove) > 0:
+            if to_remove:
                 cmd += ' && '
-        if len(to_remove) > 0:
+        if to_remove:
             cmd += 'urpme ' + ' '.join(a.name for a in to_remove)
-        if len(to_install) > 0 or len(to_remove) > 0:
+        if to_install or to_remove:
             cmd += " ; "
         cmd += 'read -p "Press [enter] to continue"'
         self.context.launch('terminal', command=cmd, callback=callback)

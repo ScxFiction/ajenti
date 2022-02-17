@@ -13,10 +13,12 @@ class HDPARMSensor (Sensor):
     timeout = 5
 
     def get_variants(self):
-        r = []
-        for s in os.listdir('/dev'):
-            if re.match('sd.$|hd.$|scd.$|fd.$|ad.+$', s):
-                r.append(s)
+        r = [
+            s
+            for s in os.listdir('/dev')
+            if re.match('sd.$|hd.$|scd.$|fd.$|ad.+$', s)
+        ]
+
         return sorted(r)
 
     def measure(self, path):
@@ -25,11 +27,10 @@ class HDPARMSensor (Sensor):
         """
         if not path:
             return -1
-        output = subprocess.check_output(['hdparm', '-C', '/dev/' + path]).splitlines()
+        output = subprocess.check_output(['hdparm', '-C', f'/dev/{path}']).splitlines()
         if len(output) < 3:
             return None
-        r = output[-1].split(':')[-1].strip()
-        return r
+        return output[-1].split(':')[-1].strip()
 
 
 @plugin

@@ -23,7 +23,7 @@ class PluginsPlugin (SectionPlugin):
             if not item.satisfied():
                 installer = ui.find('fix')
                 if item.__class__ == ModuleDependency:
-                    installer.package = 'python-module-' + item.module_name
+                    installer.package = f'python-module-{item.module_name}'
                 if item.__class__ == BinaryDependency:
                     installer.package = item.binary_name
                 installer.recheck()

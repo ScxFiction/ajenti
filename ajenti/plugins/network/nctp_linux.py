@@ -40,15 +40,15 @@ class LinuxIfconfig (object):
             r.append('linux-ipv6')
         if iface.addressing == 'dhcp':
             r.append('linux-dhcp')
-        if cls == 'ppp':
-            r.append('linux-ppp')
-        if cls == 'wireless':
-            r.append('linux-wlan')
         if cls == 'bridge':
             r.append('linux-bridge')
-        if cls == 'tunnel':
+        elif cls == 'ppp':
+            r.append('linux-ppp')
+        elif cls == 'tunnel':
             r.append('linux-tunnel')
 
+        elif cls == 'wireless':
+            r.append('linux-wlan')
         r.append('linux-ifupdown')
         return r
 

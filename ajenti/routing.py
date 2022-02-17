@@ -11,9 +11,7 @@ from ajenti.profiler import *
 
 class SocketIORouteHandler (HttpHandler):
     def __init__(self):
-        self.namespaces = {}
-        for cls in SocketPlugin.get_classes():
-            self.namespaces[cls.name] = cls
+        self.namespaces = {cls.name: cls for cls in SocketPlugin.get_classes()}
 
     def handle(self, context):
         return str(socketio.socketio_manage(context.env, self.namespaces, context))

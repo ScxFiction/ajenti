@@ -24,16 +24,12 @@ class SupervisorServiceManager (ServiceManager):
         return s
 
     def get_all(self):
-        r = []
         try:
             lines = self.run('status').splitlines()
         except:
             return []
 
-        for l in lines:
-            if l:
-                r.append(self._parse_status_line(l))
-        return r
+        return [self._parse_status_line(l) for l in lines if l]
 
     def get_one(self, name):
         try:
@@ -43,9 +39,7 @@ class SupervisorServiceManager (ServiceManager):
 
         for l in lines:
             if l:
-                if l.strip().endswith(name):
-                    return None
-                return self._parse_status_line(l)
+                return None if l.strip().endswith(name) else self._parse_status_line(l)
 
     def fill(self, programs):
         for p in programs:

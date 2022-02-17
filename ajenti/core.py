@@ -71,8 +71,7 @@ def run():
 
         def cmd_sessions():
             import pprint
-            sessions = SessionMiddleware.get().sessions
-            return sessions
+            return SessionMiddleware.get().sessions
 
         def cmd_list_instances_session():
             cmd_list_instances(cmd_sessions().values()[0].appcontext)

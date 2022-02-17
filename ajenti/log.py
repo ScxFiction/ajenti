@@ -49,12 +49,12 @@ class ConsoleHandler (logging.StreamHandler):
         l = ''
         if record.levelname == 'DEBUG':
             l = '\033[37mDEBUG\033[0m '
-        if record.levelname == 'INFO':
-            l = '\033[32mINFO\033[0m  '
-        if record.levelname == 'WARNING':
-            l = '\033[33mWARN\033[0m  '
-        if record.levelname == 'ERROR':
+        elif record.levelname == 'ERROR':
             l = '\033[31mERROR\033[0m '
+        elif record.levelname == 'INFO':
+            l = '\033[32mINFO\033[0m  '
+        elif record.levelname == 'WARNING':
+            l = '\033[33mWARN\033[0m  '
         s += l.ljust(9)
 
         context = extract_context()

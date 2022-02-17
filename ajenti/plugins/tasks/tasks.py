@@ -38,7 +38,6 @@ class CopyFilesTask (Task):
     }
 
     def run(self, source=None, destination=None):
-        index = 0
         if isinstance(source, basestring):
             source = [source]
 
@@ -47,7 +46,7 @@ class CopyFilesTask (Task):
         if not destination.endswith('/'):
             destination += '/'
 
-        for file in source:
+        for index, file in enumerate(source, start=1):
             self.message = self.message_template % file
             p = subprocess.Popen(self.command + [file, destination])
             while p.poll() is None:
@@ -55,7 +54,6 @@ class CopyFilesTask (Task):
                 if self.aborted:
                     p.terminate()
                     return
-            index += 1
             self.set_progress(index, len(source))
 
 
@@ -77,11 +75,10 @@ class DeleteFilesTask (Task):
     }
 
     def run(self, source=None):
-        index = 0
         if isinstance(source, basestring):
             source = [source]
 
-        for file in source:
+        for index, file in enumerate(source, start=1):
             self.message = self.message_template % file
             p = subprocess.Popen(self.command + [file])
             while p.poll() is None:
@@ -89,7 +86,6 @@ class DeleteFilesTask (Task):
                 if self.aborted:
                     p.terminate()
                     return
-            index += 1
             self.set_progress(index, len(source))
 
 
@@ -112,10 +108,10 @@ class RSyncTask (Task):
         cmd = ['rsync']
         for opt in ['archive', 'recursive', 'times', 'xattrs', 'delete', 'perms']:
             if kwargs.get(opt, self.default_params[opt]):
-                cmd += ['--' + opt]
+                cmd += [f'--{opt}']
         cmd += [source, destination]
         logging.info('RSync: ' + ' '.join(cmd))
-        p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)  
+        p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         o, e = p.communicate()
         if p.returncode:
             raise TaskError(o + e)

@@ -106,7 +106,7 @@ class MainSocket (SocketPlugin):
         self.context.launch = self.launch
         self.context.endpoint = self
 
-        if not 'ui' in self.request.session.data:
+        if 'ui' not in self.request.session.data:
             # This is a newly created session
             ui = UI.new()
 
@@ -283,10 +283,9 @@ class MainSocket (SocketPlugin):
     def ui_watcher(self):
         # Sends UI updates periodically
         while True:
-            if self.__updater_lock:
-                if self.ui.has_updates():
-                    self.send_update_request()
-                    gevent.sleep(0.5)
+            if self.__updater_lock and self.ui.has_updates():
+                self.send_update_request()
+                gevent.sleep(0.5)
             gevent.sleep(0.2)
 
 

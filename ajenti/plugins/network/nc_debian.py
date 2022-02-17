@@ -19,9 +19,8 @@ class DebianNetworkConfig (LinuxIfconfig, INetworkConfig):
         self.interfaces = {}
 
         try:
-            f = open('/etc/network/interfaces')
-            ss = f.read().splitlines()
-            f.close()
+            with open('/etc/network/interfaces') as f:
+                ss = f.read().splitlines()
         except IOError as e:
             return
 
@@ -29,7 +28,7 @@ class DebianNetworkConfig (LinuxIfconfig, INetworkConfig):
 
         while len(ss) > 0:
             line = ss[0].strip(' \t\n')
-            if (len(line) > 0 and not line[0] == '#'):
+            if len(line) > 0 and line[0] != '#':
                 a = line.split(' ')
                 for s in a:
                     if s == '':
@@ -53,32 +52,27 @@ class DebianNetworkConfig (LinuxIfconfig, INetworkConfig):
                         e.up = False
                 else:
                     e.params[a[0]] = ' '.join(a[1:])
-            if len(ss) > 1:
-                ss = ss[1:]
-            else:
-                ss = []
-
+            ss = ss[1:] if len(ss) > 1 else []
         for x in auto:
             if x in self.interfaces:
                 self.interfaces[x].auto = True
 
     def get_iface(self, name, bits):
-        if not name in self.interfaces:
+        if name not in self.interfaces:
             self.interfaces[name] = NetworkInterface()
             self.interfaces[name].bit_classes = bits
             self.interfaces[name].name = name
         return self.interfaces[name]
 
     def save(self):
-        f = open('/etc/network/interfaces', 'w')
-        for i in self.interfaces:
-            self.save_iface(self.interfaces[i], f)
-        f.close()
+        with open('/etc/network/interfaces', 'w') as f:
+            for i in self.interfaces:
+                self.save_iface(self.interfaces[i], f)
         return
 
     def save_iface(self, iface, f):
         if iface.auto:
-            f.write('auto ' + iface.name + '\n')
+            f.write(f'auto {iface.name}' + '\n')
         f.write('iface %s %s %s\n' % (iface.name, iface.type, iface.addressing))
         for x in iface.params:
             if iface.params[x]:

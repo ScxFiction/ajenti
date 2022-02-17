@@ -32,8 +32,7 @@ class Inflater (BasePlugin):
             layout_dir = os.path.join(manager.resolve_path(plugin), 'layout')
             if os.path.exists(layout_dir):
                 for layout in os.listdir(layout_dir):
-                    layout_name = os.path.splitext(layout)[0]
-                    if layout_name:
+                    if layout_name := os.path.splitext(layout)[0]:
                         layout = '%s:%s' % (plugin, layout_name)
                         logging.debug('Precaching layout %s' % layout)
                         self.inflate(temp_ui, layout)
@@ -57,12 +56,11 @@ class Inflater (BasePlugin):
             if cls.typeid == typeid:
                 self._element_cache[typeid] = cls
                 return cls
-        else:
-            self._element_cache[typeid] = NullElement
-            return NullElement
+        self._element_cache[typeid] = NullElement
+        return NullElement
 
     def inflate(self, ui, layout):
-        if not layout in self.cache or ajenti.debug:
+        if layout not in self.cache or ajenti.debug:
             plugin, path = layout.split(':')
             try:
                 file = open(os.path.join(manager.resolve_path(plugin), 'layout', path + '.xml'), 'r')
@@ -107,7 +105,7 @@ class Inflater (BasePlugin):
             else:
                 extra_props[key] = value
 
-        children = filter(None, list(self.inflate_rec(ui, child) for child in node))
+        children = filter(None, [self.inflate_rec(ui, child) for child in node])
         element = self.create_element(ui, tag, children=children, **props)
         for k, v in extra_props.iteritems():
             element.property_definitions[k] = UIProperty(name=k, public=False)

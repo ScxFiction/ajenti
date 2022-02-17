@@ -128,8 +128,8 @@ class TerminalHttp (BasePlugin, HttpPlugin):
         draw = ImageDraw.Draw(img)
         draw.rectangle([0, 0, terminal.width, terminal.height], fill=(0, 0, 0))
 
-        for y in range(0, terminal.height):
-            for x in range(0, terminal.width):
+        for y in range(terminal.height):
+            for x in range(terminal.width):
                 fc = terminal.screen.buffer[y][x][1]
                 if fc == 'default':
                     fc = 'lightgray'
@@ -186,16 +186,14 @@ class TerminalSocket (SocketPlugin):
             self.send_data(self.terminal.protocol.history())
             self.spawn(self.worker)
             self.spawn(self.sender)
-        if message['type'] == 'key':
-            if self.terminal:
-                ch = b64decode(message['key'])
-                self.terminal.write(ch)
-                self.ready_to_send.set()
-        if message['type'] == 'input':
-            if self.terminal:
-                data = message['content']
-                self.terminal.write(data)
-                self.ready_to_send.set()
+        if message['type'] == 'key' and self.terminal:
+            ch = b64decode(message['key'])
+            self.terminal.write(ch)
+            self.ready_to_send.set()
+        if message['type'] == 'input' and self.terminal:
+            data = message['content']
+            self.terminal.write(data)
+            self.ready_to_send.set()
         if message['type'] == 'read':
             self.ready_to_send.set()
 

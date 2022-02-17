@@ -106,9 +106,7 @@ class Users (SectionPlugin):
         ui.find('create-home-dir').visible = False
 
     def change_password(self, user, ui):
-        new_password = ui.find('new-password').value
-
-        if new_password:
+        if new_password := ui.find('new-password').value:
             try:
                 self.mgr.change_password(user, new_password)
                 self.context.notify('info', _('Password for %s was changed') % user.name)

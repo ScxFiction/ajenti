@@ -53,8 +53,5 @@ class SwapWidget (DashboardWidget):
         self.find('name').text = _('Swap usage')
         value = self.sensor.value()
         self.find('value').text = "%s/%s" % (str_fsize(value[0]), str_fsize(value[1]))
-        if value[1] > 0:
-            frac = 1.0 * value[0] / value[1]
-        else:
-            frac = 0
+        frac = 1.0 * value[0] / value[1] if value[1] > 0 else 0
         self.find('progress').value = frac

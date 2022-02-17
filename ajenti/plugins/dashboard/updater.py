@@ -26,10 +26,12 @@ class AjentiUpdater (BasePlugin):
 
         def worker():
             mgr.refresh()
-            r = []
-            for p in mgr.upgradeable:
-                if p.name.startswith(self.AJENTI_PACKAGE_NAME):
-                    r.append(p.name)
+            r = [
+                p.name
+                for p in mgr.upgradeable
+                if p.name.startswith(self.AJENTI_PACKAGE_NAME)
+            ]
+
             callback(r)
 
         gevent.spawn(worker)

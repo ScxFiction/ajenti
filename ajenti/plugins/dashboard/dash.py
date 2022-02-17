@@ -162,8 +162,7 @@ class Dash (SectionPlugin):
         for container, items in indexes.iteritems():
             idx = 0
             for item in items:
-                item = self.dash.find_uid(item)
-                if item:
+                if item := self.dash.find_uid(item):
                     item.container = container
                     item.index = idx
                     idx += 1
@@ -205,7 +204,7 @@ class CrashedWidget (DashboardWidget):
         self.append(self.ui.create('label', id='text'))
 
     def set(self, e):
-        self.find('text').text = 'Widget crashed: ' + str(e)
+        self.find('text').text = f'Widget crashed: {str(e)}'
 
 
 @plugin

@@ -11,8 +11,7 @@ from socketio.handler import SocketIOHandler
 
 def _validate_origin(env):
     valid_origin = '%s://%s' % (env['wsgi.url_scheme'], env['HTTP_HOST'])
-    request_origin = env.get('HTTP_ORIGIN', '').strip('/')
-    if request_origin:
+    if request_origin := env.get('HTTP_ORIGIN', '').strip('/'):
         if request_origin != valid_origin:
             return False
     return True
@@ -218,8 +217,7 @@ class HttpContext (object):
 
         mtime = datetime.utcfromtimestamp(math.trunc(os.path.getmtime(path)))
 
-        rtime = self.env.get('HTTP_IF_MODIFIED_SINCE', None)
-        if rtime:
+        if rtime := self.env.get('HTTP_IF_MODIFIED_SINCE', None):
             try:
                 rtime = datetime.strptime(rtime, '%a, %b %d %Y %H:%M:%S GMT')
                 if mtime <= rtime:

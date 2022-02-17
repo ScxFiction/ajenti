@@ -54,14 +54,10 @@ class HttpPlugin (object):
         for name, method in self.__class__.__dict__.iteritems():
             if hasattr(method, '_url_pattern'):
                 method = getattr(self, name)
-                match = method._url_pattern.match(context.path)
-                if match:
+                if match := method._url_pattern.match(context.path):
                     context.route_data = match.groupdict()
                     data = method(context, **context.route_data)
-                    if type(data) is types.GeneratorType:
-                        return data
-                    else:
-                        return [data]
+                    return data if type(data) is types.GeneratorType else [data]
 
 
 @interface

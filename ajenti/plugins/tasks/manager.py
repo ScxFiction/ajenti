@@ -70,10 +70,9 @@ class TaskManager (BasePlugin):
         if task in self.running_tasks:
             self.result_log = [task.result] + self.result_log[:9]
             self.running_tasks.remove(task)
-        if not self.running_tasks:
-            if self.pending_tasks:
-                t = self.pending_tasks.pop(0)
-                self.run(task=t)
+        if not self.running_tasks and self.pending_tasks:
+            t = self.pending_tasks.pop(0)
+            self.run(task=t)
 
     def refresh(self):
         complete_tasks = [task for task in self.running_tasks if task.complete]

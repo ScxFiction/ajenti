@@ -212,7 +212,7 @@ class UIElement (object):
         """
         r = []
         q = [self]
-        while len(q) > 0:
+        while q:
             e = q.pop(0)
             if exclude and exclude(e):
                 continue
@@ -293,10 +293,11 @@ class UIElement (object):
             'style': '_s',
         }
 
-        result = {}
-        for key, value in attributes.iteritems():
-            if attr_defaults.get(key, None) != value:
-                result[attr_map.get(key, key)] = value
+        result = {
+            attr_map.get(key, key): value
+            for key, value in attributes.iteritems()
+            if attr_defaults.get(key, None) != value
+        }
 
         for prop in self.properties:
             if self.property_definitions[prop].public:

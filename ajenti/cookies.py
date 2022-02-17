@@ -188,14 +188,14 @@ class Definitions(object):
         month_numbers[name] = index + 1
     # Use the same list to create regexps for months.
     MONTH_SHORT = "(?:" + "|".join(item[:3] for item in month_list) + ")"
-    MONTH_LONG = "(?:" + "|".join(item for item in month_list) + ")"
+    MONTH_LONG = "(?:" + "|".join(month_list) + ")"
 
     # Same drill with weekdays, for the same reason.
     weekday_list = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
                     "Saturday", "Sunday"]
     weekday_abbr_list = [item[:3] for item in weekday_list]
     WEEKDAY_SHORT = "(?:" + "|".join(item[:3] for item in weekday_list) + ")"
-    WEEKDAY_LONG = "(?:" + "|".join(item for item in weekday_list) + ")"
+    WEEKDAY_LONG = "(?:" + "|".join(weekday_list) + ")"
 
     # This regexp tries to exclude obvious nonsense in the first pass.
     DAY_OF_MONTH = "(?:[0 ]?[1-9]|[12][0-9]|[3][01])(?!\d)"
@@ -344,9 +344,8 @@ def parse_string(data, unquote=default_unquote):
     # str objects (unicode) using decode().
     # But in Python 2, the same decode causes unquote to butcher the data.
     # So in that case, just leave the bytes.
-    if isinstance(data, bytes):
-        if sys.version_info > (3, 0, 0):  # pragma: no cover
-            data = data.decode('ascii')
+    if isinstance(data, bytes) and sys.version_info > (3, 0, 0):
+        data = data.decode('ascii')
     # Recover URL encoded data
     unquoted = unquote(data)
     # Without this step, Python 2 may have good URL decoded *bytes*,
@@ -368,27 +367,19 @@ def parse_date(value):
     match = Definitions.DATE_RE.match(value) if value else None
     if not match:
         return None
-    # We're going to extract and prepare captured data in 'data'.
-    data = {}
     captured = match.groupdict()
     fields = ['year', 'month', 'day', 'hour', 'minute', 'second']
-    # If we matched on the RFC 1123 family format
-    if captured['year']:
-        for field in fields:
-            data[field] = captured[field]
-    # If we matched on the asctime format, use year2 etc.
-    else:
-        for field in fields:
-            data[field] = captured[field + "2"]
+    data = {
+        field: captured[field] if captured['year'] else captured[f'{field}2']
+        for field in fields
+    }
+
     year = data['year']
     # Interpret lame 2-digit years - base the cutoff on UNIX epoch, in case
     # someone sets a '70' cookie meaning 'distant past'. This won't break for
     # 58 years and people who use 2-digit years are asking for it anyway.
     if len(year) == 2:
-        if int(year) < 70:
-            year = "20" + year
-        else:
-            year = "19" + year
+        year = f'20{year}' if int(year) < 70 else f'19{year}'
     year = int(year)
     # Clamp to [1900, 9999]: strftime has min 1900, datetime has max 9999
     data['year'] = max(1900, min(year, 9999))
@@ -549,21 +540,16 @@ def encode_cookie_value(data, quote=default_cookie_quote):
     if not isinstance(data, bytes):
         data = data.encode("utf-8")
 
-    # URL encode data so it is safe for cookie value
-    quoted = quote(data)
-
     # Don't force to bytes, so that downstream can use proper string API rather
     # than crippled bytes, and to encourage encoding to be done just once.
-    return quoted
+    return quote(data)
 
 
 def encode_extension_av(data, quote=default_extension_quote):
     """URL-encode strings to make them safe for an extension-av
     (extension attribute value): <any CHAR except CTLs or ";">
     """
-    if not data:
-        return ''
-    return quote(data)
+    return '' if not data else quote(data)
 
 
 def render_date(date):
@@ -590,10 +576,9 @@ def _parse_request(header_data, ignore_bad_cookies=False):
     cookies_dict = {}
     for line in Definitions.EOL.split(header_data.strip()):
         matches = Definitions.COOKIE_RE.finditer(line)
-        matches = [item for item in matches]
+        matches = list(matches)
         for match in matches:
-            invalid = match.group('invalid')
-            if invalid:
+            if invalid := match.group('invalid'):
                 if not ignore_bad_cookies:
                     raise InvalidCookieError(data=invalid)
                 _report_invalid_cookie(invalid)
@@ -630,9 +615,8 @@ def parse_one_response(line, ignore_bad_cookies=False,
         'value': match.group('value')})
     # Extract individual attrs from the attrs chunk
     for match in Definitions.ATTR_RE.finditer(match.group('attrs')):
-        captured = dict((k, v) for (k, v) in match.groupdict().items() if v)
-        unrecognized = captured.get('unrecognized', None)
-        if unrecognized:
+        captured = {k: v for (k, v) in match.groupdict().items() if v}
+        if unrecognized := captured.get('unrecognized', None):
             if not ignore_bad_attributes:
                 raise InvalidCookieAttributeError(None, unrecognized,
                                                   "unrecognized")
@@ -651,7 +635,7 @@ def parse_one_response(line, ignore_bad_cookies=False,
                 del captured[key]
         elif 'year2' in captured:
             for key in timekeys:
-                del captured[key + "2"]
+                del captured[f'{key}2']
         cookie_dict.update(captured)
     return cookie_dict
 
@@ -705,7 +689,7 @@ class Cookie(object):
 
     def _set_attributes(self, attrs, ignore_bad_attributes=False):
         for attr_name, attr_value in attrs.items():
-            if not attr_name in self.attribute_names:
+            if attr_name not in self.attribute_names:
                 if not ignore_bad_attributes:
                     raise InvalidCookieAttributeError(
                         attr_name, attr_value,
@@ -792,9 +776,8 @@ class Cookie(object):
         should be a datetime). Called automatically when an attribute
         value is set.
         """
-        validator = self.attribute_validators.get(name, None)
-        if validator:
-            return True if validator(value) else False
+        if validator := self.attribute_validators.get(name, None):
+            return bool(validator(value))
         return True
 
     def __setattr__(self, name, value):
@@ -807,12 +790,8 @@ class Cookie(object):
                 raise InvalidCookieError(message="Cookies must have names")
             # Ignore None values indicating unset attr. Other invalids should
             # raise error so users of __setattr__ can learn.
-            if value is not None:
-                if not self.validate(name, value):
-                    pass # sorry, nope
-                    #raise InvalidCookieAttributeError(
-                    #    name, value, "did not validate with " +
-                    #    repr(self.attribute_validators.get(name)))
+            if value is not None and not self.validate(name, value):
+                pass # sorry, nope
         object.__setattr__(self, name, value)
 
     def __getattr__(self, name):
@@ -834,8 +813,7 @@ class Cookie(object):
         # Only look for attributes registered in attribute_names.
         for python_attr_name, cookie_attr_name in self.attribute_names.items():
             value = getattr(self, python_attr_name)
-            renderer = self.attribute_renderers.get(python_attr_name, None)
-            if renderer:
+            if renderer := self.attribute_renderers.get(python_attr_name, None):
                 value = renderer(value)
             # If renderer returns None, or it's just natively none, then the
             # value is suppressed entirely - does not appear in any rendering.
@@ -850,11 +828,9 @@ class Cookie(object):
         """
         # Use whatever renderers are defined for name and value.
         name, value = self.name, self.value
-        renderer = self.attribute_renderers.get('name', None)
-        if renderer:
+        if renderer := self.attribute_renderers.get('name', None):
             name = renderer(name)
-        renderer = self.attribute_renderers.get('value', None)
-        if renderer:
+        if renderer := self.attribute_renderers.get('value', None):
             value = renderer(value)
         return ''.join((name, "=", value))
 
@@ -865,11 +841,9 @@ class Cookie(object):
         # Use whatever renderers are defined for name and value.
         # (.attributes() is responsible for all other rendering.)
         name, value = self.name, self.value
-        renderer = self.attribute_renderers.get('name', None)
-        if renderer:
+        if renderer := self.attribute_renderers.get('name', None):
             name = renderer(name)
-        renderer = self.attribute_renderers.get('value', None)
-        if renderer:
+        if renderer := self.attribute_renderers.get('value', None):
             value = renderer(value)
         return '; '.join(
             ['{0}={1}'.format(name, value)] +

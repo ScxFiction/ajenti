@@ -17,7 +17,7 @@ class AjentiSyncProvider (UserSyncProvider):
         pass
 
     def check_password(self, username, password):
-        if not username in ajenti.config.tree.users:
+        if username not in ajenti.config.tree.users:
             return False
         type = 'plain'
         saved = ajenti.config.tree.users[username].password

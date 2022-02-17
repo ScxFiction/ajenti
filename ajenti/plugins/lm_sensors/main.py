@@ -19,8 +19,7 @@ class LMSensors (BasePlugin):
             return {}  # sensors not configured
         r = {}
         for l in lines:
-            m = self.re_temp.match(l)
-            if m:
+            if m := self.re_temp.match(l):
                 r[m.groupdict()['name']] = float(m.groupdict()['value'])
         return r
 

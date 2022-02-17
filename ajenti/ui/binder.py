@@ -21,11 +21,11 @@ def is_bound(el):
     """
     if el.typeid.startswith('bind:'):
         return True
-    for prop in el.properties.keys():
-        if prop == 'bind' or prop.startswith('{bind}') or is_bound_context(el):
-            if el.properties[prop]:
-                return True
-    return False
+    return any(
+        (prop == 'bind' or prop.startswith('{bind}') or is_bound_context(el))
+        and el.properties[prop]
+        for prop in el.properties.keys()
+    )
 
 
 @public
@@ -126,11 +126,13 @@ class PropertyBinding (Binding):
             # find a property with matching bindtypes
             v = self.__get_transformed()
             for prop in ui.property_definitions.values():
-                if prop.bindtypes:
-                    # nb: we can't guess the type for None
-                    if type(v) in prop.bindtypes or (v is None) or (object in prop.bindtypes):
-                        self.property = prop.name
-                        break
+                if prop.bindtypes and (
+                    type(v) in prop.bindtypes
+                    or (v is None)
+                    or (object in prop.bindtypes)
+                ):
+                    self.property = prop.name
+                    break
             else:
                 raise Exception('Cannot bind %s.%s (%s, = %s) to %s' % (repr(obj), attribute, repr(type(v)), repr(v), ui))
         else:
@@ -194,14 +196,11 @@ class ListAutoBinding (Binding):
         self.unpopulate()
 
         self.binders = {}
-        index = 0
-
         if len(self.values) > len(self.ui.children):
             raise Exception('Number of bind:list children is less than collection size')
 
-        for value in self.values:
+        for index, value in enumerate(self.values):
             template = self.ui.children[index]
-            index += 1
             binder = Binder(value, template)
             binder.populate()
             self.binders[value] = binder
@@ -355,11 +354,7 @@ class CollectionAutoBinding (Binding):
         if self.template:
             self.template_parent.remove(self.template)
 
-        if self.attribute:
-            self.collection = self.get()
-        else:
-            self.collection = self.object
-
+        self.collection = self.get() if self.attribute else self.object
         self.values = self.ui.values(self.collection)
         if self.ui.sorting:
             self.values = sorted(self.values, key=self.ui.sorting)
@@ -435,10 +430,11 @@ class CollectionAutoBinding (Binding):
 
     def update(self):
         if hasattr(self.items_ui_element, 'sortable') and self.items_ui_element.order:
-            sortable_indexes = []
-            for i, e in enumerate(self.items_ui_element.children):
-                if e.visible:
-                    sortable_indexes.append(i)
+            sortable_indexes = [
+                i
+                for i, e in enumerate(self.items_ui_element.children)
+                if e.visible
+            ]
 
             try:
                 absolute_order = [sortable_indexes[i - 1] for i in self.items_ui_element.order]
@@ -455,7 +451,7 @@ class CollectionAutoBinding (Binding):
                         absolute_order_idx += 1
                     else:
                         new_indexes.append(i)
-                
+
                 shuffle = lambda a: dict([(old, a[i]) for old, i in enumerate(new_indexes) if i < len(self.collection)])
                 self.binders = shuffle(self.binders)
                 self.item_ui = shuffle(self.item_ui)
@@ -565,10 +561,13 @@ class Binder (object):
                 k = bindable.properties[prop]
 
                 # Nested binder context
-                if prop == '{binder}context':
-                    if bindable is not ui and k:
-                        if Binding.applicable(object, k):
-                            self.__autodiscover(Binding.extract(object, k), bindable)
+                if (
+                    prop == '{binder}context'
+                    and bindable is not ui
+                    and k
+                    and Binding.applicable(object, k)
+                ):
+                    self.__autodiscover(Binding.extract(object, k), bindable)
 
                 # Property binding
                 if prop.startswith('{bind}') or prop == 'bind':

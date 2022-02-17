@@ -79,13 +79,13 @@ class ActiveDirectorySyncProvider (UserSyncProvider, BasePlugin):
         for u in users:
             username = u[1]['sAMAccountName'][0]
             found_names.append(username)
-            if not username in ajenti.config.tree.users:
+            if username not in ajenti.config.tree.users:
                 u = UserData()
                 u.name = username
                 ajenti.config.tree.users[username] = u
 
         for user in list(ajenti.config.tree.users.values()):
-            if not user.name in found_names and user.name != 'root':
+            if user.name not in found_names and user.name != 'root':
                 ajenti.config.tree.users.pop(user.name)
 
         ajenti.config.save()

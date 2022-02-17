@@ -127,14 +127,13 @@ class FileManager (SectionPlugin):
         destination = self.controller.tabs[self.tabs.active].path
         logging.info('[fm] uploading %s to %s' % (name, destination))
         try:
-            output = open(os.path.join(destination, name), 'w')
-            while True:
-                data = file.read(1024 * 1024)
-                if not data:
-                    break
-                gevent.sleep(0)
-                output.write(data)
-            output.close()
+            with open(os.path.join(destination, name), 'w') as output:
+                while True:
+                    data = file.read(1024 * 1024)
+                    if not data:
+                        break
+                    gevent.sleep(0)
+                    output.write(data)
         except OSError as e:
             self.context.notify('error', str(e))
         self.refresh()

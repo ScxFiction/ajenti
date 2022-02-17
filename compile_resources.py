@@ -34,7 +34,7 @@ ajenti.log.init()
 
 
 def dirname():
-    return 'tmp/' + str(uuid.uuid4())
+    return f'tmp/{str(uuid.uuid4())}'
 
 def compile_coffeescript(inpath):
     outpath = '%s.c.js' % inpath
@@ -59,8 +59,7 @@ def compile_less(inpath):
         #return
 
     logging.info('Compiling LESS %s' % inpath)
-    out = check_output('lessc "%s" "%s"' % (inpath, outpath), shell=True)
-    if out:
+    if out := check_output('lessc "%s" "%s"' % (inpath, outpath), shell=True):
         logging.error(out)
     #print subprocess.check_output('recess --compile "%s" > "%s"' % (inpath, outpath), shell=True)
 
@@ -91,7 +90,7 @@ def traverse(fx):
 
     while True:
         for gl in greenlets:
-            if gl.ready() and not gl in done_gls:
+            if gl.ready() and gl not in done_gls:
                 done_gls.append(gl)
                 done += 1
                 dots = int(1.0 * length * done / total)

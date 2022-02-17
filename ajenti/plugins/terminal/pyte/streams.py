@@ -228,9 +228,8 @@ class Stream(object):
 
             if hasattr(listener, "__after__"):
                 listener.__after__(event)
-        else:
-            if kwargs.get("reset", True):
-                self.reset()
+        if kwargs.get("reset", True):
+            self.reset()
 
     # State transformers.
     # ...................
@@ -385,8 +384,7 @@ class ByteStream(Stream):
 
             self.buffer = decoder.getstate()
             return super(ByteStream, self).feed(chars)
-        else:
-            raise
+        raise
 
 
 class DebugStream(ByteStream):
@@ -421,7 +419,7 @@ class DebugStream(ByteStream):
 
             def __getattr__(self, event):
                 def inner(*args, **flags):
-                    to.write(event.upper() + " ")
+                    to.write(f'{event.upper()} ')
                     to.write("; ".join(map(safe_str, args)))
                     to.write(" ")
                     to.write(", ".join("{0}: {1}".format(name, safe_str(arg))

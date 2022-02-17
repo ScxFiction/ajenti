@@ -125,7 +125,7 @@ class JobDefinition (object):
         self.schedule_special = j.get('schedule_special', None)
         self.schedule_minute = j.get('schedule_minute', '0')
         for _ in ['hour', 'day_of_month', 'month', 'day_of_week']:
-            setattr(self, 'schedule_' + _, j.get('schedule_' + _, '*'))
+            setattr(self, f'schedule_{_}', j.get(f'schedule_{_}', '*'))
 
     def save(self):
         return {

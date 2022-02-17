@@ -21,7 +21,7 @@ class YumPackageManager (PackageManager):
                 raise e
         out_a = subprocess.check_output(['yum', '-C', '-d0', '-e0', 'list', 'installed', '-q'])
         self.all = self._parse_yum(out_a)
-        self.all_dict = dict((x.name, x) for x in self.all)
+        self.all_dict = {x.name: x for x in self.all}
         self.upgradeable = self._parse_yum(out_u)
 
     def search(self, query):
@@ -33,13 +33,12 @@ class YumPackageManager (PackageManager):
                 continue
             if s[0].startswith('====') or s[0] == ':':
                 continue
-            else:
-                p = PackageInfo()
-                p.name = s[0]
-                p.state = 'r'
-                if p.name in self.all_dict and self.all_dict[p.name].state == 'i':
-                    p.state = 'i'
-                r.append(p)
+            p = PackageInfo()
+            p.name = s[0]
+            p.state = 'r'
+            if p.name in self.all_dict and self.all_dict[p.name].state == 'i':
+                p.state = 'i'
+            r.append(p)
         return r
 
     def get_lists(self):
@@ -49,11 +48,11 @@ class YumPackageManager (PackageManager):
         to_install = [a for a in actions if a.action == 'i']
         to_remove = [a for a in actions if a.action == 'r']
         cmd = ''
-        if len(to_install) > 0:
+        if to_install:
             cmd += 'yum install ' + ' '.join(a.name for a in to_install)
-            if len(to_remove) > 0:
+            if to_remove:
                 cmd += ' && '
-        if len(to_remove) > 0:
+        if to_remove:
             cmd += 'yum remove ' + ' '.join(a.name for a in to_remove)
         self.context.launch('terminal', command=cmd, callback=callback)
 
@@ -64,11 +63,10 @@ class YumPackageManager (PackageManager):
             try:
                 if s[0] == '':
                     continue
-                else:
-                    p = PackageInfo()
-                    p.name = s[0]
-                    p.state = 'i'
-                    r.append(p)
+                p = PackageInfo()
+                p.name = s[0]
+                p.state = 'i'
+                r.append(p)
                 if len(r.keys()) > 250:
                     break
             except:

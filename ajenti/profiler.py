@@ -20,7 +20,7 @@ def profile_end(name=None):
     """
     last_name = _profiles_stack.pop()
     name = name or last_name
-    if not name in _profiles:
+    if name not in _profiles:
         _profiles[name] = 0.0
     _profiles[name] += time.time() - _profiles_running[name]
 

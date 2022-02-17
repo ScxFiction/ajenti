@@ -91,17 +91,15 @@ def detect_platform():
     else:
         dist = pyplatform.dist()[0]
 
-    if dist == '':
-        if os.path.exists('/etc/os-release'):
-            release = open('/etc/os-release').read()
-            if 'Arch Linux' in release:
-                dist = 'arch'
+    if dist == '' and os.path.exists('/etc/os-release'):
+        release = open('/etc/os-release').read()
+        if 'Arch Linux' in release:
+            dist = 'arch'
 
-    if dist == '':
-        if os.path.exists('/etc/system-release'):
-            release = open('/etc/system-release').read()
-            if 'Amazon Linux AMI' in release:
-                dist = 'centos'
+    if dist == '' and os.path.exists('/etc/system-release'):
+        release = open('/etc/system-release').read()
+        if 'Amazon Linux AMI' in release:
+            dist = 'centos'
 
     if dist == '':
         try:

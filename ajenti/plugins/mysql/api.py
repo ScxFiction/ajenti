@@ -25,20 +25,21 @@ class MySQLDB (BasePlugin):
         self.username = self.classconfig['user']
         self.password = self.classconfig['password']
         p = subprocess.Popen(
-            [
-                'mysql',
-                '-u' + self.username,
-            ] + 
-            ([
-                '-p' + self.password,
-            ] if self.password else []) + 
-            [
-                '-h', self.host or 'localhost',
-            ],
+            (
+                (
+                    ['mysql', f'-u{self.username}']
+                    + ([f'-p{self.password}'] if self.password else [])
+                )
+                + [
+                    '-h',
+                    self.host or 'localhost',
+                ]
+            ),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+
         sql = (('USE %s; ' % db) if db else '') + sql
         logging.debug(sql)
         o, e = p.communicate(sql)
@@ -47,10 +48,7 @@ class MySQLDB (BasePlugin):
         return filter(None, o.splitlines()[1:])
 
     def query_sql(self, db, sql):
-        r = []
-        for l in self.query(sql + ';', db):
-            r.append(l.split('\t'))
-        return r
+        return [l.split('\t') for l in self.query(f'{sql};', db)]
 
     def query_databases(self):
         r = []

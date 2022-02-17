@@ -95,24 +95,21 @@ class Firewall (SectionPlugin):
         def post_rule_bind(o, c, i, u):
             u.find('add-option').on('change', self.on_add_option, c, i, u)
             action = ''
-            j_option = i.get_option('j', 'jump')
-            if j_option:
+            if j_option := i.get_option('j', 'jump'):
                 action = j_option.arguments[0].value
             u.find('action').text = action
             u.find('action').style = 'iptables-action iptables-%s' % action
             u.find('action-select').value = action
-            u.find('title').text = i.comment if i.comment else i.summary
+            u.find('title').text = i.comment or i.summary
 
         def post_rule_update(o, c, i, u):
             action = u.find('action-select').value
-            j_option = i.get_option('j', 'jump')
-            if j_option:
+            if j_option := i.get_option('j', 'jump'):
                 j_option.arguments[0].value = action
-            else:
-                if action:
-                    o = OptionData.create_destination()
-                    o.arguments[0].value = action
-                    i.options.append(o)
+            elif action:
+                o = OptionData.create_destination()
+                o.arguments[0].value = action
+                i.options.append(o)
 
         self.find('rules').post_item_bind = post_rule_bind
         self.find('rules').post_item_update = post_rule_update

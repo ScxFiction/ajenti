@@ -22,9 +22,13 @@ class AvailabilitySymlinks(object):
         self.supports_activation = supports_activation
 
     def list_available(self):
-        return [x for x in sorted(os.listdir(self.dir_a)) if
-                not os.path.isdir(os.path.join(self.dir_a, x))
-                and not os.path.splitext(os.path.join(self.dir_a, x))[-1] in self.ignore_ext]
+        return [
+            x
+            for x in sorted(os.listdir(self.dir_a))
+            if not os.path.isdir(os.path.join(self.dir_a, x))
+            and os.path.splitext(os.path.join(self.dir_a, x))[-1]
+            not in self.ignore_ext
+        ]
 
     def is_enabled(self, entry):
         if not self.supports_activation:
@@ -53,8 +57,7 @@ class AvailabilitySymlinks(object):
     def disable(self, entry):
         if not self.supports_activation:
             return
-        e = self.find_link(entry)
-        if e:
+        if e := self.find_link(entry):
             os.unlink(os.path.join(self.dir_e, e))
 
     def rename(self, old, new):

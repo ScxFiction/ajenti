@@ -24,8 +24,7 @@ def start():
 
 
 def send(url, data):
-    id = ajenti.config.tree.installation_id
-    if id:
+    if id := ajenti.config.tree.installation_id:
         data['id'] = id
     logging.debug('Feedback >> %s (%s)' % (url, data))
     try:
@@ -38,8 +37,7 @@ def send(url, data):
 
 def worker():
     global enabled
-    enabled = ajenti.config.tree.enable_feedback
-    if enabled:
+    if enabled := ajenti.config.tree.enable_feedback:
         data = {
             'version': ajenti.version,
             'os': ajenti.platform,

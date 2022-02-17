@@ -25,11 +25,7 @@ class Sensor (object):
         :type  id: str
         :rtype: :class:`Sensor`, None
         """
-        for cls in Sensor.get_classes():
-            if cls.id == id:
-                return cls.get()
-        else:
-            return None
+        return next((cls.get() for cls in Sensor.get_classes() if cls.id == id), None)
 
     def value(self, variant=None):
         """
@@ -40,7 +36,10 @@ class Sensor (object):
         :rtype: int, float, tuple, list, dict, str
         """
         t = time.time()
-        if (not variant in self.cache) or (t - self.last_measurement[variant]) > self.timeout:
+        if (
+            variant not in self.cache
+            or (t - self.last_measurement[variant]) > self.timeout
+        ):
             self.cache[variant] = self.measure(variant)
             self.last_measurement[variant] = t
         return self.cache[variant]

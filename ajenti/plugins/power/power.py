@@ -18,14 +18,13 @@ class PowerSensor (Sensor):
 
     def measure(self, variant):
         adapters_path = '/proc/acpi/ac_adapter'
-        if os.path.exists(adapters_path):
-            for x in os.listdir(adapters_path):
-                ss = open('/proc/acpi/ac_adapter/%s/state' % x).read().splitlines()
-                for s in ss:
-                    if s.startswith('state:') and s.endswith('on-line'):
-                        return 'ac'
-        else:
+        if not os.path.exists(adapters_path):
             return 'ac'
+        for x in os.listdir(adapters_path):
+            ss = open('/proc/acpi/ac_adapter/%s/state' % x).read().splitlines()
+            for s in ss:
+                if s.startswith('state:') and s.endswith('on-line'):
+                    return 'ac'
         return 'battery'
 
 

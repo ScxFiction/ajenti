@@ -51,7 +51,7 @@ class AjentiOrgReporter (BasePlugin):
 
     def get_key(self):
         self.load_classconfig()
-        if not 'key' in self.classconfig:
+        if 'key' not in self.classconfig:
             return None
         return self.classconfig['key']
 
@@ -66,9 +66,7 @@ class AjentiOrgReporter (BasePlugin):
             datapack = {'sensors': {}}
 
             for sensor in Sensor.get_all():
-                data = {}
-                for variant in sensor.get_variants():
-                    data[variant] = sensor.value(variant)
+                data = {variant: sensor.value(variant) for variant in sensor.get_variants()}
                 datapack['sensors'][sensor.id] = data
 
             gevent.sleep(10)

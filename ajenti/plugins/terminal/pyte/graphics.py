@@ -11,6 +11,7 @@
     :license: LGPL, see LICENSE for more details.
 """
 
+
 import itertools
 
 
@@ -72,6 +73,6 @@ BG = {
 }
 
 # Reverse mapping of all available attributes -- keep this private!
-_SGR = dict((v, k) for k, v in itertools.chain(BG.items(),
+_SGR = {v: k for k, v in itertools.chain(BG.items(),
                                                FG.items(),
-                                               TEXT.items()))
+                                               TEXT.items())}

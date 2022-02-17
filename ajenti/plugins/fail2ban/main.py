@@ -123,7 +123,7 @@ class fail2ban(SectionPlugin):
             filename = os.path.join(c.path, s_fn)
             i = 1
             while os.path.exists(filename):
-                s_fn = new_fn.format('_' + str(i))
+                s_fn = new_fn.format(f'_{i}')
                 filename = os.path.join(c.path, s_fn)
                 i += 1
             try:
@@ -176,7 +176,7 @@ class fail2ban(SectionPlugin):
             self.context.notify('error', _('Some parameters are empty.'))
             return
 
-        with open(filter_fname + '.tmp', 'w') as rt:
+        with open(f'{filter_fname}.tmp', 'w') as rt:
             rt.write(self.find('filter-file').value)
             rt_name = rt.name
             rt.close()

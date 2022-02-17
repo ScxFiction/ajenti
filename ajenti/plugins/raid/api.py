@@ -43,7 +43,7 @@ class RAIDManager (BasePlugin):
                 tokens = tokens.split()
 
                 if tokens[1].startswith('('):
-                    tokens[0] += ' ' + tokens[1]
+                    tokens[0] += f' {tokens[1]}'
                     tokens.pop(1)
 
                 array.state = tokens[0]
@@ -60,7 +60,7 @@ class RAIDManager (BasePlugin):
 
                 self.arrays.append(array)
 
-                for i, device_str in enumerate(devices):
+                for device_str in devices:
                     device = RAIDDevice()
                     device.name = device_str.split('[')[0]
                     device.index = int(device_str.split('[')[1].split(']')[0])

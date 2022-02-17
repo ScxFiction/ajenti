@@ -88,11 +88,10 @@ class Notepad (SectionPlugin):
 
     @on('save-button', 'click')
     def on_save(self):
-        path = self.controller.files[self.selected]['path']
-        if not path:
-            self.on_save_as()
-        else:
+        if path := self.controller.files[self.selected]['path']:
             self.on_save_dialog_select(path)
+        else:
+            self.on_save_as()
 
     @on('save-as-button', 'click')
     def on_save_as(self):
@@ -132,8 +131,10 @@ class Notepad (SectionPlugin):
 
     @on('bookmark-button', 'click')
     def on_bookmark(self):
-        if not self.controller.files[self.selected]['path'] \
-                in self.classconfig['bookmarks']:
+        if (
+            self.controller.files[self.selected]['path']
+            not in self.classconfig['bookmarks']
+        ):
             self.classconfig['bookmarks'].append(
                 self.controller.files[self.selected]['path']
             )

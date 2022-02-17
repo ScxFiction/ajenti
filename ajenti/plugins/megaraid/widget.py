@@ -16,8 +16,7 @@ class LSIWidget (ConfigurableWidget):
     def on_start(self):
         self.mgr.refresh()
         self.find('variant').text = self.config['variant']
-        arr = self.mgr.find_array(self.config['variant'])
-        if arr:
+        if arr := self.mgr.find_array(self.config['variant']):
             self.find('value').text = arr.state
 
     def create_config(self):

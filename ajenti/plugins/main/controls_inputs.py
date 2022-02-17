@@ -33,10 +33,7 @@ class DateTime (UIElement):
 
     @dateobject.setter
     def dateobject__set(self, value):
-        if value:
-            self.value = calendar.timegm(value.timetuple())
-        else:
-            self.value = None
+        self.value = calendar.timegm(value.timetuple()) if value else None
 
 
 @p('value', default='', bindtypes=[str, unicode])
@@ -73,10 +70,7 @@ class Dropdown (UIElement):
         return None
 
     def value_set(self, value):
-        if value in self.values:
-            self.index = self.values.index(value)
-        else:
-            self.index = 0
+        self.index = self.values.index(value) if value in self.values else 0
 
     value = property(value_get, value_set)
 

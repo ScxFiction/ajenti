@@ -44,7 +44,7 @@ class Licensing (BasePlugin):
         os.chmod(LICENSE_PATH, 0600)
 
     def activate(self):
-        response = requests.post(URL + 'activate?key=' + self.read_license())
+        response = requests.post(f'{URL}activate?key={self.read_license()}')
         logging.debug('Licensing << %s' % response.content)
         response = json.loads(response.content)
         if response['status'] == 'ok' and self.__license_status == {}:
@@ -53,7 +53,7 @@ class Licensing (BasePlugin):
         return self.__license_status
 
     def deactivate(self):
-        response = requests.post(URL + 'deactivate?key=' + self.read_license())
+        response = requests.post(f'{URL}deactivate?key={self.read_license()}')
         logging.debug('Licensing << %s' % response.content)
 
     def worker(self):

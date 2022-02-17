@@ -24,14 +24,11 @@ class MyUnameWidget(ConfigurableWidget):
                     args += o
 
         if len(args):
-            args = '-' + args
+            args = f'-{args}'
         self.find('value').text = subprocess.check_output(['uname', args])
 
     def create_config(self):
-        options = {}
-        for o in self.options:
-            options['opt_%s'%o] = o in 'srm'
-        return options
+        return {'opt_%s'%o: o in 'srm' for o in self.options}
 
     def on_config_start(self):
         for o in self.options:

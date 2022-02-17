@@ -243,7 +243,7 @@ def extract_context():
         if not arguments:
             continue
         self_argument = arguments[0]  # This *should* be 'self'
-        if not self_argument in frame[0].f_locals:
+        if self_argument not in frame[0].f_locals:
             continue
         instance = frame[0].f_locals[self_argument]  # = first passed *arg
         if hasattr(instance, 'context') and isinstance(instance.context, PluginContext):

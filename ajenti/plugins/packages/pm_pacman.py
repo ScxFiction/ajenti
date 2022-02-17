@@ -29,7 +29,7 @@ class ArchPackageManager (PackageManager):
         self.upgradeable = self._parse_upgradeable(out_u)
 
         self.all = self._parse_all_installed(out_a)
-        self.all_dict = dict((x.name, x) for x in self.all)
+        self.all_dict = {x.name: x for x in self.all}
 
     def search(self, query):
         try:
@@ -58,12 +58,12 @@ class ArchPackageManager (PackageManager):
         to_install = [a for a in actions if a.action == 'i']
         to_remove = [a for a in actions if a.action == 'r']
         cmd = ''
-        if len(to_install) > 0:
+        if to_install:
             cmd += 'pacman -S --noconfirm ' + ' '.join(a.name for a in to_install)
-            if len(to_remove) > 0:
+            if to_remove:
                 cmd += ' && '
 
-        if len(to_remove) > 0:
+        if to_remove:
             cmd += 'pacman -R --noconfirm ' + ' '.join(a.name for a in to_remove)
 
         logging.debug('launching terminal with command %s' % cmd)

@@ -56,12 +56,17 @@ class Item (object):
         except KeyError:
             self.group = str(stat.st_gid)
 
-        self.mod_ur, self.mod_uw, self.mod_ux, \
-            self.mod_gr, self.mod_gw, self.mod_gx, \
-            self.mod_ar, self.mod_aw, self.mod_ax = [
-                (stat.st_mode & Item.stat_bits[i] != 0)
-                for i in range(0, 9)
-            ]
+        (
+            self.mod_ur,
+            self.mod_uw,
+            self.mod_ux,
+            self.mod_gr,
+            self.mod_gw,
+            self.mod_gx,
+            self.mod_ar,
+            self.mod_aw,
+            self.mod_ax,
+        ) = [stat.st_mode & Item.stat_bits[i] != 0 for i in range(9)]
 
     @property
     def mode(self):
@@ -70,10 +75,7 @@ class Item (object):
             self.mod_gr, self.mod_gw, self.mod_gx,
             self.mod_ar, self.mod_aw, self.mod_ax
         ]
-        return sum(
-            Item.stat_bits[i] * (1 if mods[i] else 0)
-            for i in range(0, 9)
-        )
+        return sum(Item.stat_bits[i] * (1 if mods[i] else 0) for i in range(9))
 
     def write(self):
         newpath = os.path.join(self.path, self.name)

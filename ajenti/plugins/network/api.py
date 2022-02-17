@@ -52,10 +52,7 @@ class NetworkInterface(object):
         self.editable = True
 
     def __getitem__(self, idx):
-        if idx in self.params:
-            return self.params[idx]
-        else:
-            return ''
+        return self.params[idx] if idx in self.params else ''
 
     def __setitem__(self, idx, val):
         self.params[idx] = val

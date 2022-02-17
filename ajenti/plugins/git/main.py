@@ -45,7 +45,7 @@ class GitPlugin (SectionPlugin):
              except:
                  pass
 
-        if self.user == None:
+        if self.user is None:
             exit(-1)
 
         # Set Conf & Key Directory
@@ -57,8 +57,8 @@ class GitPlugin (SectionPlugin):
         self.find('repocollection').new_item = lambda c: Repository('newrepo')
 
         # Remove old Gitolite.conf and replace our version
-        os.remove(self.confdir + 'gitolite.conf')
-        with open((self.confdir + 'gitolite.conf'), 'w+') as file:
+        os.remove(f'{self.confdir}gitolite.conf')
+        with open(f'{self.confdir}gitolite.conf', 'w+') as file:
             file.write('include "*.conf"')
 
     def on_page_load(self):
@@ -79,16 +79,14 @@ class GitPlugin (SectionPlugin):
     def refresh_repositories(self):
         self.repositories = []
 
-        userlist = []
-        for user in self.users:
-            userlist.append(user.name)
+        userlist = [user.name for user in self.users]
         self.find('rwusers').values = userlist
         self.find('rwusers').labels = userlist
         self.find('rousers').values = userlist
         self.find('rousers').labels = userlist
 
         for file in os.listdir(self.confdir):
-            if os.path.isfile(self.confdir + file) and not 'gitolite.conf' in file:
+            if os.path.isfile(self.confdir + file) and 'gitolite.conf' not in file:
                 with open(self.confdir + file) as content:
                     content = content.read()
                     repo = Repository('')
@@ -111,10 +109,11 @@ class GitPlugin (SectionPlugin):
     def save_repositories(self):
         self.binder.update()
 
-        files = []
-        for file in os.listdir(self.confdir):
-            if os.path.isfile(self.confdir + file) and not "gitolite.conf" in file:
-                files.append(file)
+        files = [
+            file
+            for file in os.listdir(self.confdir)
+            if os.path.isfile(self.confdir + file) and "gitolite.conf" not in file
+        ]
 
         for repo in self.repositories:
             with open((self.confdir + repo.name + '.conf'), 'w+') as file:
@@ -132,8 +131,8 @@ class GitPlugin (SectionPlugin):
 
                 file.write(content)
 
-            if (repo.name + '.conf') in files:
-                files.remove(repo.name + '.conf')
+            if f'{repo.name}.conf' in files:
+                files.remove(f'{repo.name}.conf')
 
         for file in files:
             os.remove(self.confdir + file)
@@ -157,15 +156,12 @@ class GitPlugin (SectionPlugin):
     def save_users(self):
         self.binder.update()
 
-        files = []
-        for file in os.listdir(self.keydir):
-            files.append(file)
-
+        files = list(os.listdir(self.keydir))
         for user in self.users:
             with open((self.keydir + user.name + '.pub'), 'w+') as file:
                 file.write(user.pubkey)
-            if (user.name + '.pub') in files:
-                files.remove(user.name + '.pub')
+            if f'{user.name}.pub' in files:
+                files.remove(f'{user.name}.pub')
 
         for file in files:
             os.remove(self.keydir + file)

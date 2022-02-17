@@ -29,7 +29,7 @@ class PidFile(object):
         try:
             fcntl.flock(self.pidfile.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except IOError:
-            raise SystemExit("Already running according to " + self.path)
+            raise SystemExit(f'Already running according to {self.path}')
         self.pidfile.seek(0)
         self.pidfile.truncate()
         self.pidfile.write(str(os.getpid()))
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hc:dv', ['help', 'config=', 'daemon', 'start', 'set-platform='])
     except getopt.GetoptError as e:
-        print(str(e))
+        print(e)
         usage()
         sys.exit(2)
 

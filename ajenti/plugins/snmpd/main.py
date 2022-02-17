@@ -162,8 +162,7 @@ class SNMPDPlugin (SectionPlugin):
 
         enabled_mibs = []
         for mib in self.snmp_config.tree.mibs:
-            for x in mib.name.strip('-+:').split(':'):
-                enabled_mibs.append(x)
+            enabled_mibs.extend(iter(mib.name.strip('-+:').split(':')))
         self.mibs = []
         for dirpath, dirname, filenames in os.walk('/usr/share/mibs', followlinks=True):
             for x in filenames:

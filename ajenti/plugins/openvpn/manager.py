@@ -192,8 +192,7 @@ class manager(object):
         """Executes "status 2" command and returns response as a dictionary.
         @rtype: dict
         @return: Dictionary"""
-        status = dict()
-        status["clients"] = list()
+        status = {'clients': []}
         # V2 status
         for line in self.execute("status", "2"):
             fields = line.split(",")
